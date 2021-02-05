@@ -101,3 +101,40 @@ class MessageDetailsViewTest:
         assert response.status_code == 200
         assert response.data["id"] is None
         assert Message.objects.count() == 0
+
+
+@pytest.mark.django_db
+class MessageRangeViewTest:
+    def test_no_matching_elements(self, api_client, message_factory):
+        message_factory.create_batch(5)
+        Message.objects.filter(id__in=(2, 3)).delete()
+        response = api_client.get(
+            reverse("message:range", kwargs={"begin_id": 2, "end_id": 3})
+        )
+
+        assert response.status_code == 200
+        data = response.data
+        assert len(data) == 0
+
+    def test_single_element(self, api_client, message_factory):
+        message_factory.create_batch(3)
+        response = api_client.get(
+            reverse("message:range", kwargs={"begin_id": 2, "end_id": 2})
+        )
+
+        assert response.status_code == 200
+        data = response.data
+        assert len(data) == 1
+        assert data[0]["id"] == 2
+
+    def test_out_of_bounds_range(self, api_client, message_factory):
+        message_factory.create_batch(3)
+        response = api_client.get(
+            reverse("message:range", kwargs={"begin_id": 2, "end_id": 100})
+        )
+
+        assert response.status_code == 200
+        data = response.data
+        assert len(data) == 2
+        assert data[0]["id"] == 2
+        assert data[1]["id"] == 3

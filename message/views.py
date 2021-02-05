@@ -41,3 +41,12 @@ def message_detail(request, id: int):
     if request.method == "DELETE":
         message.delete()
     return Response(MessageSerializer(message).data)
+
+
+@api_view(http_method_names=["GET"])
+def message_range_view(request, begin_id: int, end_id: int):
+    """Retrieve a list of messages with id between (and including) begin_id and end_id."""
+    messages = Message.objects.filter(id__gte=begin_id, id__lte=end_id).order_by(
+        "created_at"
+    )
+    return Response(MessageSerializer(messages, many=True).data)
