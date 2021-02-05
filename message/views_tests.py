@@ -2,6 +2,34 @@ import pytest
 from django.urls import reverse
 from django.utils import timezone
 
+from .models import Message
+
+
+@pytest.mark.django_db
+class CreateMessageTest:
+    def test_create_message(self, api_client):
+        recipient = "king_arthur"
+        content = "I fart in your general direction!"
+
+        response = api_client.post(
+            reverse("message:create"),
+            {
+                "recipient": recipient,
+                "content": content,
+            },
+        )
+        assert response.status_code == 200
+        data = response.data
+        assert data["id"] == 1
+        assert data["recipient"] == recipient
+        assert data["content"] == content
+        assert data["retrieved_at"] is None
+
+        assert Message.objects.count() == 1
+        message = Message.objects.first()
+        assert message.content == content
+        assert message.recipient.username == recipient
+
 
 @pytest.mark.django_db
 class NewMessagesTest:

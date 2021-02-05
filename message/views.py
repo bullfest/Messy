@@ -10,6 +10,16 @@ from .models import Message
 from .serializers import MessageSerializer
 
 
+@api_view(http_method_names=["POST"])
+def create_message(request):
+    serializer = MessageSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    else:
+        return Response(serializer.errors)
+
+
 @api_view(http_method_names=["GET"])
 def new_messages(request):
     with transaction.atomic():
