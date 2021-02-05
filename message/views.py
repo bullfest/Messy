@@ -1,8 +1,6 @@
 from django.db import transaction
-from django.db.models import QuerySet, Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from rest_framework import viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
@@ -30,3 +28,16 @@ def new_messages(request):
         Message.objects.filter(id__in=message_ids).update(retrieved_at=timezone.now())
         data = MessageSerializer(messages, many=True).data
         return Response(data)
+
+
+@api_view(http_method_names=["GET", "DELETE"])
+def message_detail(request, id: int):
+    """
+    Detail view for Message objects.
+    GET - Retrieve the Message with id
+    DELETE - Delete the message with id, will also return the message that's deleted
+    """
+    message = get_object_or_404(Message, id=id)
+    if request.method == "DELETE":
+        message.delete()
+    return Response(MessageSerializer(message).data)

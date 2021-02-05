@@ -79,3 +79,25 @@ class NewMessagesTest:
         assert response.status_code == 200
         data = response.data
         assert len(data) == 0
+
+
+@pytest.mark.django_db
+class MessageDetailsViewTest:
+    def test_get_missing_message(self, api_client):
+        response = api_client.get(reverse("message:detail", kwargs={"id": 1}))
+        assert response.status_code == 404
+
+    def test_get_message(self, api_client, message):
+        response = api_client.get(reverse("message:detail", kwargs={"id": message.id}))
+        assert response.status_code == 200
+        assert response.data["id"] == message.id
+
+    def test_delete_message(self, api_client, message):
+        assert Message.objects.count() == 1
+
+        response = api_client.delete(
+            reverse("message:detail", kwargs={"id": message.id})
+        )
+        assert response.status_code == 200
+        assert response.data["id"] is None
+        assert Message.objects.count() == 0
