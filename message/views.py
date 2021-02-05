@@ -10,6 +10,12 @@ from .serializers import MessageSerializer
 
 @api_view(http_method_names=["POST"])
 def create_message(request):
+    """Create a new Message.
+
+    Required data:
+    recipient: Username of the recipient
+    content: The content of the message
+    """
     serializer = MessageSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
@@ -20,6 +26,7 @@ def create_message(request):
 
 @api_view(http_method_names=["POST"])
 def new_messages(request):
+    """Retrieve new messages that haven't been retrieved from this view before."""
     with transaction.atomic():
         messages = list(
             Message.objects.filter(retrieved_at__isnull=True).order_by("created_at")
@@ -32,10 +39,9 @@ def new_messages(request):
 
 @api_view(http_method_names=["GET", "DELETE"])
 def message_detail(request, id: int):
-    """
-    Detail view for Message objects.
+    """Detail view for Message objects.
     GET - Retrieve the Message with id
-    DELETE - Delete the message with id, will also return the message that's deleted
+    DELETE - Delete the message with id, will also return the Message that's deleted
     """
     message = get_object_or_404(Message, id=id)
     if request.method == "DELETE":
