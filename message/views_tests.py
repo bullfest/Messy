@@ -34,14 +34,14 @@ class CreateMessageTest:
 @pytest.mark.django_db
 class NewMessagesTest:
     def test_no_new_messages(self, api_client):
-        response = api_client.get(reverse("message:list_new"))
+        response = api_client.post(reverse("message:list_new"))
         assert response.status_code == 200
         assert response.data == []
 
     @pytest.mark.freeze_time
     def test_single_new_message(self, api_client, message):
         assert message.retrieved_at is None
-        response = api_client.get(reverse("message:list_new"))
+        response = api_client.post(reverse("message:list_new"))
         assert response.status_code == 200
         data = response.data
 
@@ -57,7 +57,7 @@ class NewMessagesTest:
     def test_multiple_new_messages(self, api_client, message_factory):
         messages = message_factory.create_batch(2)
         messages.sort(key=lambda m: m.created_at, reverse=True)
-        response = api_client.get(reverse("message:list_new"))
+        response = api_client.post(reverse("message:list_new"))
         assert response.status_code == 200
         data = response.data
 
@@ -69,13 +69,13 @@ class NewMessagesTest:
     def test_retrieve_twice(self, api_client, message_factory):
         message_factory.create()
 
-        response = api_client.get(reverse("message:list_new"))
+        response = api_client.post(reverse("message:list_new"))
         assert response.status_code == 200
         data = response.data
         assert len(data) == 1
 
         # Message should only be retrieved once
-        response = api_client.get(reverse("message:list_new"))
+        response = api_client.post(reverse("message:list_new"))
         assert response.status_code == 200
         data = response.data
         assert len(data) == 0

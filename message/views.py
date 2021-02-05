@@ -18,7 +18,7 @@ def create_message(request):
         return Response(serializer.errors)
 
 
-@api_view(http_method_names=["GET"])
+@api_view(http_method_names=["POST"])
 def new_messages(request):
     with transaction.atomic():
         messages = list(
