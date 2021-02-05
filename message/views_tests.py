@@ -30,6 +30,12 @@ class CreateMessageTest:
         assert message.content == content
         assert message.recipient.username == recipient
 
+    def test_required_fields(self, api_client):
+        response = api_client.post(reverse("message:create"))
+
+        assert response.status_code == 400
+        assert set(response.data.keys()) == {"recipient", "content"}
+
 
 @pytest.mark.django_db
 class NewMessagesTest:
