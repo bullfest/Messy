@@ -16,6 +16,9 @@ def create_message(request):
     Required data:
     recipient: Username of the recipient
     content: The content of the message
+
+    Optional data:
+    sender: Username of the sender
     """
     serializer = MessageSerializer(data=request.data)
     if serializer.is_valid():

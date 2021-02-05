@@ -13,6 +13,7 @@ class TestMessageSerializer:
             "id",
             "content",
             "recipient",
+            "sender",
             "created_at",
             "retrieved_at",
         }

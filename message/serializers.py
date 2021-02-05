@@ -17,6 +17,7 @@ class UserAsUsernameField(rest_framework.fields.CharField):
 
 class MessageSerializer(serializers.ModelSerializer):
     recipient = UserAsUsernameField()
+    sender = UserAsUsernameField(required=False)
 
     class Meta:
         model = Message
@@ -26,6 +27,7 @@ class MessageSerializer(serializers.ModelSerializer):
             "id",
             "retrieved_at",
             "recipient",
+            "sender",
         ]
         read_only_fields = [
             "retrieved_at",
