@@ -38,12 +38,13 @@
                     :on-success      [::message-created]
                     :on-failure      [::message-failed]}}))
 
-(re-frame/reg-event-db
+(re-frame/reg-event-fx
   ::message-created
-  (fn [db [_ response]]
-      db))
+  (fn [_ [_ response]]
+      (js/alert (str "Message with id " (:id response) " has been created!"))))
 
-(re-frame/reg-event-db
+(re-frame/reg-event-fx
   ::message-failed
   (fn [db [_ response]]
-      db))
+      (comment "This is really lousy error handling ¯\\_(ツ)_/¯")
+      (js/alert (str "Failed creating a message" (:response response)))))
