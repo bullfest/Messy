@@ -40,12 +40,33 @@
              [:label {:for "message"} "Message"]
              [:textarea {:name      "message"
                          :class     "form-control"
-                         :on-change #((do
-                                        (reset! message (-> % .-target .-value))))
+                         :on-change #(reset! message (-> % .-target .-value))
 
                          }]]
             [:button {:class "btn btn-primary "} "Send"]
             ]))
+
+(defn view-range-form []
+      (let [begin_id (reagent/atom "")
+            end_id (reagent/atom "")]
+           [:form {:class     "form-inline"
+                   :on-submit #(do (.preventDefault %)
+                                   (re-frame/dispatch [::events/view-message-range @begin_id @end_id]))}
+            [:label.sr-only {:for "start-id"} "Start id"]
+            [:input.m-2 {:name        "start-id"
+                         :style       {:width "10ch"}
+                         :type        "text"
+                         :placeholder "Start id"
+                         :on-change #(reset! begin_id (-> % .-target .-value))
+                         }]
+            [:label.sr-only {:for "start-id"} "End id"]
+            [:input.m-2 {:name        "end-id"
+                         :style       {:width "10ch"}
+                         :type        "text"
+                         :placeholder "End id"
+                         :on-change #(reset! end_id (-> % .-target .-value))
+                         }]
+            [:button.btn.btn-primary "View range"]]))
 
 (defn messages-options []
       [:div {:class "d-flex flex-row"}
@@ -53,7 +74,7 @@
                  :on-click #(re-frame/dispatch [::events/view-new-messages])
                  }
         "View new"]
-       ])
+       (view-range-form)])
 
 (defn render-message [message]
       ^{:key (:id message)}

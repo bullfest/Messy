@@ -81,3 +81,14 @@
                     :response-format (ajax/json-response-format {:keywords? true})
                     :on-success [::set-messages]
                     :on-failure [::request-failed]}}))
+
+
+(re-frame/reg-event-fx
+  ::view-message-range
+  (fn [_ [_ begin_id end_id]]
+      (println "Getting the cow!")
+      {:http-xhrio {:method :get
+                    :uri (str cfg/server-url "/message/range/" begin_id "/" end_id "/")
+                    :response-format (ajax/json-response-format {:keywords? true})
+                    :on-success [::set-messages]
+                    :on-failure [::request-failed]}}))
