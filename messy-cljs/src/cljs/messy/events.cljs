@@ -8,6 +8,7 @@
     [messy.config :as cfg]
     ))
 
+(comment "--- DB management events ---")
 (re-frame/reg-event-db
   ::initialize-db
   (fn [_ _]
@@ -18,15 +19,25 @@
   (fn [db [_ value]]
       (assoc db :username value)))
 
+(re-frame/reg-event-db
+  ::set-messages
+  (fn [db [_ value]]
+      (assoc db :messages value)))
+
+(re-frame/reg-event-db
+  ::remove-message
+  (fn [db [_ message-id]]
+      (assoc db :messages (filter #(not= (:id %)  message-id) (:messages db)))))
+
+(comment "--- Helpers ---")
 (defn filter-blank [map]
       (into {} (filter #(seq (second %)) map)))
 
+
+(comment "--- Events that interact with server ---")
 (re-frame/reg-event-fx
   ::create-message
   (fn [_world [_ content recipient sender]]
-      (println content)
-      (println recipient)
-      (println sender)
       {:http-xhrio {:method          :post
                     :uri             (str cfg/server-url "/message/")
                     :params          (filter-blank {:content   content
@@ -36,7 +47,7 @@
                     :format          (ajax/json-request-format)
                     :response-format (ajax/json-response-format {:keywords? true})
                     :on-success      [::message-created]
-                    :on-failure      [::message-failed]}}))
+                    :on-failure      [::request-failed]}}))
 
 (re-frame/reg-event-fx
   ::message-created
@@ -44,7 +55,29 @@
       (js/alert (str "Message with id " (:id response) " has been created!"))))
 
 (re-frame/reg-event-fx
-  ::message-failed
+  ::request-failed
   (fn [db [_ response]]
       (comment "This is really lousy error handling ¯\\_(ツ)_/¯")
-      (js/alert (str "Failed creating a message" (:response response)))))
+      (js/alert (str "Request failed" (:response response)))))
+
+(re-frame/reg-event-fx
+  ::delete-message
+  (fn [_ [_ message-id]]
+      {:http-xhrio {:method :delete
+                    :uri (str cfg/server-url "/message/" message-id "/")
+                    :format          (ajax/json-request-format)
+                    :response-format (ajax/json-response-format {:keywords? true})
+                    :on-success (re-frame/dispatch [::remove-message message-id])
+                    :on-failure [::request-failed]}}))
+
+(re-frame/reg-event-fx
+  ::view-new-messages
+  (fn [_ _]
+      (println "Getting the cow!")
+      {:http-xhrio {:method :post
+                    :uri (str cfg/server-url "/message/new/")
+                    :params {}
+                    :format          (ajax/json-request-format)
+                    :response-format (ajax/json-response-format {:keywords? true})
+                    :on-success [::set-messages]
+                    :on-failure [::request-failed]}}))

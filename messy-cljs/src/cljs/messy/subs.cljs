@@ -6,3 +6,8 @@
  ::username
  (fn [db]
    (:username db)))
+
+(re-frame/reg-sub
+  ::messages
+  (fn [db]
+      (:messages db)))

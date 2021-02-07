@@ -24,7 +24,9 @@
            [:form {:on-submit (fn [e]
                                   (.preventDefault e)
                                   (re-frame/dispatch [::events/create-message @message @recipient @sender])
-                                  )}
+                                  (.reset (.-target e))
+                                  (reset! recipient "")
+                                  (reset! message ""))}
             [:div {:class "form-group"}
              [:label {:for "recipient"} "Recipient"]
              [:input {:name      "recipient"
@@ -45,11 +47,48 @@
             [:button {:class "btn btn-primary "} "Send"]
             ]))
 
+(defn messages-options []
+      [:div {:class "d-flex flex-row"}
+       [:button {:class    "btn btn-secondary"
+                 :on-click #(re-frame/dispatch [::events/view-new-messages])
+                 }
+        "View new"]
+       ])
+
+(defn render-message [message]
+      ^{:key (:id message)}
+      [:tr
+       [:th (:id message)]
+       [:th (:sender message)]
+       [:th (:recipient message)]
+       [:th (:content message)]
+       [:th (:created_at message)]
+       [:th
+        [:button {:type     "button"
+                  :class    "btn btn-sm btn-danger"
+                  :on-click #(re-frame/dispatch [::events/delete-message (:id message)])}
+         "Delete"]]])
+
+(defn messages []
+      (let [messages (re-frame/subscribe [::subs/messages])]
+           (when (seq @messages)
+                 [:table {:class "table"}
+                  [:thead [:tr
+                           [:th "Id"]
+                           [:th "Sender"]
+                           [:th "Recipient"]
+                           [:th "Message"]
+                           [:th "Sent at"]
+                           ]]
+                  [:tbody (map render-message @messages)]])))
 
 (defn main-panel []
       [:div {:class "container mt-4"}
        [:div {:class "d-flex flex-row justify-content-between"}
         [:h1 "Welcome to Messy"]
         (username-form)]
+       (messages-options)
+       (messages)
+       [:hr]
        [:div {:class "container"}
         (message-form)]])
