@@ -1,4 +1,5 @@
 import pytest
+from django.contrib.auth.models import User
 from django.urls import reverse
 from django.utils import timezone
 
@@ -29,6 +30,22 @@ class CreateMessageTest:
         message = Message.objects.first()
         assert message.content == content
         assert message.recipient.username == recipient
+
+    def test_extra_fields_ignored(self, api_client):
+        response = api_client.post(
+            reverse("message:create"),
+            {
+                "recipient": "king_arthur",
+                "content": "Listen -- Strange women lying in ponds "
+                "distributing swords is no basis "
+                "for a system of government.",
+                "created_at": "2020-12-24T15:00+01:00",
+            },
+        )
+        assert response.status_code == 200
+        message = Message.objects.first()
+        assert message
+        assert message.created_at - timezone.now() < timezone.timedelta(minutes=5)
 
     def test_required_fields(self, api_client):
         response = api_client.post(reverse("message:create"))
@@ -144,3 +161,64 @@ class MessageRangeViewTest:
         assert len(data) == 2
         assert data[0]["id"] == 2
         assert data[1]["id"] == 3
+
+
+@pytest.mark.django_db
+def test_full_flow(api_client):
+    response = api_client.post(
+        reverse("message:create"),
+        {
+            "recipient": "wensleydale",
+            "content": "It's not much of a cheese shop is it?",
+        },
+    )
+    assert response.status_code == 200
+
+    response = api_client.post(
+        reverse("message:create"),
+        {
+            "sender": "wensleydale",
+            "recipient": "customer",
+            "content": "Finest in the district!",
+        },
+    )
+    assert response.status_code == 200
+
+    response = api_client.post(reverse("message:list_new"))
+    assert response.status_code == 200
+    assert len(response.data) == 2
+
+    response = api_client.post(reverse("message:list_new"))
+    assert response.status_code == 200
+    assert len(response.data) == 0
+
+    response = api_client.post(
+        reverse("message:create"),
+        {
+            "sender": "customer",
+            "recipient": "wensleydale",
+            "content": "Explain the logic underlying that conclusion, please.",
+        },
+    )
+
+    response = api_client.post(reverse("message:list_new"))
+    assert response.status_code == 200
+    assert len(response.data) == 1
+
+    response = api_client.delete(reverse("message:detail", kwargs={"id": 2}))
+    assert response.status_code == 200
+    response = api_client.get(
+        reverse("message:range", kwargs={"begin_id": 1, "end_id": 3})
+    )
+    assert response.status_code == 200
+    data = response.data
+    assert len(data) == 2
+    assert data[0]["id"] == 1
+    assert data[1]["id"] == 3
+
+    wensleydale = User.objects.get(username="wensleydale")
+    customer = User.objects.get(username="customer")
+    assert wensleydale.sent_messages.count() == 0
+    assert wensleydale.recieved_messages.count() == 2
+    assert customer.sent_messages.count() == 1
+    assert customer.recieved_messages.count() == 0
