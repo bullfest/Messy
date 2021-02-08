@@ -4,9 +4,7 @@
    [re-frame.core :as re-frame]
    [messy.events :as events]
    [messy.views :as views]
-   [messy.config :as config]
-   ))
-
+   [messy.config :as config]))
 
 (defn dev-setup []
   (when config/debug?

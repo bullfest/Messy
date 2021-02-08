@@ -10,7 +10,7 @@
                  [day8.re-frame/http-fx "0.2.2"]]
 
   :plugins [[lein-shadow "0.3.1"]
-            
+            [lein-cljfmt "0.7.0"]
             [lein-shell "0.5.0"]]
 
   :min-lein-version "2.9.0"

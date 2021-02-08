@@ -8,21 +8,21 @@
    (:username db)))
 
 (re-frame/reg-sub
-  ::messages
-  (fn [db]
-      (:messages db)))
+ ::messages
+ (fn [db]
+   (:messages db)))
 
 (re-frame/reg-sub
-  ::recipient
-  (fn [db]
-      (:recipient db)))
+ ::recipient
+ (fn [db]
+   (:recipient db)))
 
 (re-frame/reg-sub
-  ::content
-  (fn [db]
-      (:content db)))
+ ::content
+ (fn [db]
+   (:content db)))
 
 (re-frame/reg-sub
-  ::range
-  (fn [db]
-      (:range db)))
+ ::range
+ (fn [db]
+   (:range db)))
