@@ -19,57 +19,56 @@
 
 (defn message-form []
       (let [sender (re-frame/subscribe [::subs/username])
-            recipient (reagent/atom "")
-            message (reagent/atom "")]
+            recipient (re-frame/subscribe [::subs/recipient])
+            message (re-frame/subscribe [::subs/content])]
            [:form {:on-submit (fn [e]
                                   (.preventDefault e)
                                   (re-frame/dispatch [::events/create-message @message @recipient @sender])
-                                  (.reset (.-target e))
-                                  (reset! recipient "")
-                                  (reset! message ""))}
+                                  (re-frame/dispatch [::events/set-recipient ""])
+                                  (re-frame/dispatch [::events/set-content ""]))}
             [:div {:class "form-group"}
              [:label {:for "recipient"} "Recipient"]
              [:input {:name      "recipient"
                       :class     "form-control"
                       :type      "text"
-                      :on-change #((do
-                                     (reset! recipient (-> % .-target .-value .toLowerCase))))
-
-                      }]]
+                      :value     @recipient
+                      :on-change #(re-frame/dispatch [::events/set-recipient (-> % .-target .-value .toLowerCase)])}]]
             [:div {:class "form-group"}
              [:label {:for "message"} "Message"]
              [:textarea {:name      "message"
                          :class     "form-control"
-                         :on-change #(reset! message (-> % .-target .-value))
-
-                         }]]
+                         :value     @message
+                         :on-change #(re-frame/dispatch [::events/set-content (-> % .-target .-value .toLowerCase)])}]]
             [:button {:class "btn btn-primary "} "Send"]
             ]))
 
 (defn view-range-form []
-      (let [begin_id (reagent/atom "")
-            end_id (reagent/atom "")]
+      (let [range (re-frame/subscribe [::subs/range])
+            begin_id (first @range)
+            end_id (second @range)]
            [:form {:class     "form-inline"
                    :on-submit #(do (.preventDefault %)
-                                   (re-frame/dispatch [::events/view-message-range @begin_id @end_id]))}
+                                   (re-frame/dispatch [::events/view-message-range begin_id end_id]))}
             [:label.sr-only {:for "start-id"} "Start id"]
             [:input.m-2 {:name        "start-id"
                          :style       {:width "10ch"}
                          :type        "text"
                          :placeholder "Start id"
-                         :on-change #(reset! begin_id (-> % .-target .-value))
+                         :value       begin_id
+                         :on-change   #(re-frame/dispatch [::events/set-range [(-> % .-target .-value) end_id]])
                          }]
             [:label.sr-only {:for "start-id"} "End id"]
             [:input.m-2 {:name        "end-id"
                          :style       {:width "10ch"}
                          :type        "text"
                          :placeholder "End id"
-                         :on-change #(reset! end_id (-> % .-target .-value))
+                         :value       end_id
+                         :on-change   #(re-frame/dispatch [::events/set-range [begin_id (-> % .-target .-value)]])
                          }]
             [:button.btn.btn-primary "View range"]]))
 
 (defn messages-options []
-      [:div {:class "d-flex flex-row"}
+      [:div {:class "d-flex flex-row justify-content-around"}
        [:button {:class    "btn btn-secondary"
                  :on-click #(re-frame/dispatch [::events/view-new-messages])
                  }

@@ -11,3 +11,18 @@
   ::messages
   (fn [db]
       (:messages db)))
+
+(re-frame/reg-sub
+  ::recipient
+  (fn [db]
+      (:recipient db)))
+
+(re-frame/reg-sub
+  ::content
+  (fn [db]
+      (:content db)))
+
+(re-frame/reg-sub
+  ::range
+  (fn [db]
+      (:range db)))

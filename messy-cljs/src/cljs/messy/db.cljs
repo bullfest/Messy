@@ -2,4 +2,7 @@
 
 (def default-db
   {:username ""
-   :messages []})
+   :messages []
+   :recipient ""
+   :content ""
+   :range ["" ""]})

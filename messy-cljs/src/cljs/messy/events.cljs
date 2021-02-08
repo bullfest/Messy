@@ -20,6 +20,23 @@
       (assoc db :username value)))
 
 (re-frame/reg-event-db
+  ::set-recipient
+  (fn [db [_ value]]
+      (assoc db :recipient value)))
+
+(re-frame/reg-event-db
+  ::set-content
+  (fn [db [_ value]]
+      (assoc db :content value)))
+
+(re-frame/reg-event-db
+  ::set-range
+  (fn [db [_ value]]
+      (println value)
+      (assoc db :range value)))
+
+
+(re-frame/reg-event-db
   ::set-messages
   (fn [db [_ value]]
       (assoc db :messages value)))
@@ -27,7 +44,7 @@
 (re-frame/reg-event-db
   ::remove-message
   (fn [db [_ message-id]]
-      (assoc db :messages (filter #(not= (:id %)  message-id) (:messages db)))))
+      (assoc db :messages (filter #(not= (:id %) message-id) (:messages db)))))
 
 (comment "--- Helpers ---")
 (defn filter-blank [map]
@@ -63,32 +80,30 @@
 (re-frame/reg-event-fx
   ::delete-message
   (fn [_ [_ message-id]]
-      {:http-xhrio {:method :delete
-                    :uri (str cfg/server-url "/message/" message-id "/")
+      {:http-xhrio {:method          :delete
+                    :uri             (str cfg/server-url "/message/" message-id "/")
                     :format          (ajax/json-request-format)
                     :response-format (ajax/json-response-format {:keywords? true})
-                    :on-success (re-frame/dispatch [::remove-message message-id])
-                    :on-failure [::request-failed]}}))
+                    :on-success      [::remove-message message-id]
+                                     :on-failure [::request-failed]}}))
 
 (re-frame/reg-event-fx
   ::view-new-messages
   (fn [_ _]
-      (println "Getting the cow!")
-      {:http-xhrio {:method :post
-                    :uri (str cfg/server-url "/message/new/")
-                    :params {}
+      {:http-xhrio {:method          :post
+                    :uri             (str cfg/server-url "/message/new/")
+                    :params          {}
                     :format          (ajax/json-request-format)
                     :response-format (ajax/json-response-format {:keywords? true})
-                    :on-success [::set-messages]
-                    :on-failure [::request-failed]}}))
+                    :on-success      [::set-messages]
+                    :on-failure      [::request-failed]}}))
 
 
 (re-frame/reg-event-fx
   ::view-message-range
   (fn [_ [_ begin_id end_id]]
-      (println "Getting the cow!")
-      {:http-xhrio {:method :get
-                    :uri (str cfg/server-url "/message/range/" begin_id "/" end_id "/")
+      {:http-xhrio {:method          :get
+                    :uri             (str cfg/server-url "/message/range/" begin_id "/" end_id "/")
                     :response-format (ajax/json-response-format {:keywords? true})
-                    :on-success [::set-messages]
-                    :on-failure [::request-failed]}}))
+                    :on-success      [::set-messages]
+                    :on-failure      [::request-failed]}}))
