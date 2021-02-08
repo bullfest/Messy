@@ -8,7 +8,6 @@ class Message(models.Model):
     A message being sent from one user to another.
     """
 
-    uuid = models.UUIDField(default=uuid.uuid4, unique=True)
     sender = models.ForeignKey(
         User, null=True, on_delete=models.CASCADE, related_name="sent_messages"
     )
