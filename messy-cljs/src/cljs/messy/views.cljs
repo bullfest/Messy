@@ -38,7 +38,7 @@
              [:textarea {:name      "message"
                          :class     "form-control"
                          :value     @message
-                         :on-change #(re-frame/dispatch [::events/set-content (-> % .-target .-value .toLowerCase)])}]]
+                         :on-change #(re-frame/dispatch [::events/set-content (-> % .-target .-value)])}]]
             [:button {:class "btn btn-primary "} "Send"]
             ]))
 
