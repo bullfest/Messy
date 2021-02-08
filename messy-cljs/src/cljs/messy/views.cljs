@@ -69,10 +69,11 @@
 
 (defn messages-options []
       [:div {:class "d-flex flex-row justify-content-around"}
-       [:button {:class    "btn btn-secondary"
+       [:form
+        [:button {:class    "btn btn-secondary"
                  :on-click #(re-frame/dispatch [::events/view-new-messages])
                  }
-        "View new"]
+        "View new messages"]]
        (view-range-form)])
 
 (defn render-message [message]
